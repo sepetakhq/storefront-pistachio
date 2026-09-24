@@ -1,0 +1,37 @@
+# Every push to main publishes this storefront to the template registry:
+# dist/ goes to the R2 bucket under sf/<template>/<sha>/ with immutable
+# assets, and sf/<template>/current is moved to that build last. The API
+# picks the pointer up within its cache TTL; assets load from the CDN.
+# Rollback = point `current` at an older build (see the kit's README).
+name: Release
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: publish
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm test
+      - run: npx sf-publish
+        env:
+          SF_TEMPLATE: pistachio
+          SF_BUCKET: ${{ vars.R2_BUCKET }}
+          SF_ENDPOINT: https://${{ secrets.R2_ACCOUNT_ID }}.r2.cloudflarestorage.com
+          SF_CDN_BASE: ${{ vars.CDN_BASE_URL }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          AWS_REGION: auto
+          AWS_REQUEST_CHECKSUM_CALCULATION: when_required
