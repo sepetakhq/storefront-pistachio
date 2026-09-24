@@ -51,8 +51,14 @@ since, or the page is blank.)
   demo-shop string or undefined token anywhere else. `src/no-hardcode.test.js`
   enforces all three.
 - Branch on `payment.kind`, render `order.timeline` and `status_label`.
-- The API sends names, not looks: feature `mark` is up to four characters
-  (known emoji become line icons, `featureMark`), banner `bg` is `butter` or
-  `pink` (`bannerTheme`), `hero.em` is text after the title.
+- Draw what the backend sends, as sent. Every label a merchant might change
+  is a `section_copy` key read through `sectionText`, and `DEFAULT_LABELS` is
+  only the fallback for a blank one; `no-hardcode.test.js` fails when one of
+  those words is typed anywhere else. A feature `mark` shows exactly as typed.
+  Never add a table that turns merchant input into something else (emoji →
+  icon), and never add to the kit for this template's sake: see rule 11 in
+  the platform's CLAUDE.md.
+- The API's `bg` is a name, `butter` or `pink` (`bannerTheme`); `hero.em` is
+  text after the title.
 - The template's own decisions live in `src/lib/copy.js` as pure functions
   with tests.

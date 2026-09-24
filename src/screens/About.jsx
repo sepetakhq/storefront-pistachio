@@ -16,6 +16,8 @@ export default function About() {
   // An unset title renders the wordmark rather than an empty h1.
   const title = brand.aboutTitle || name;
   const story = paragraphs(brand.aboutBody);
+  // The page's name in the breadcrumb is what the shop calls it in its nav.
+  const crumb = brand.nav?.find((n) => n.path === '/tentang')?.label || sectionText(brand.sections, 'story_cta');
 
   // Each card only when the merchant filled it in: three headings over
   // nothing read as a broken page, not a quiet one.
@@ -34,7 +36,7 @@ export default function About() {
           <nav aria-label="Breadcrumb" className="pc-crumbs">
             <Link to="/">Beranda</Link>
             <span aria-hidden="true">/</span>
-            <span aria-current="page">Tentang kami</span>
+            <span aria-current="page">{crumb}</span>
           </nav>
           <h1 style={{ textWrap: 'balance' }}>{title}</h1>
         </div>

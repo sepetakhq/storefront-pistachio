@@ -96,13 +96,13 @@ describe('About', () => {
   it('draws a contact card only for what the merchant filled in', () => {
     withBrand({ aboutTitle: 'Ayuna', opening_hours: 'Senin–Sabtu', phone: '0812' });
     render(<About />);
-    expect(screen.getByText('Jam buka')).toBeTruthy();
+    expect(screen.getByText('Jam operasional')).toBeTruthy();
     expect(screen.getByText('Hubungi kami')).toBeTruthy();
     expect(screen.queryByText('Alamat toko')).toBeNull();
     cleanup();
     withBrand({ aboutTitle: 'Ayuna' });
     render(<About />);
-    expect(screen.queryByText('Jam buka')).toBeNull();
+    expect(screen.queryByText('Jam operasional')).toBeNull();
   });
 
   it('titles the cards and the WhatsApp button with the shop\'s words, else its own', () => {
@@ -113,7 +113,7 @@ describe('About', () => {
     });
     render(<About />);
     expect(screen.getByText('Lokasi')).toBeTruthy();
-    expect(screen.getByText('Jam buka')).toBeTruthy();
+    expect(screen.getByText('Jam operasional')).toBeTruthy();
     expect(screen.getByText('Telepon')).toBeTruthy();
     expect(screen.getByRole('link', { name: 'Chat admin' })).toBeTruthy();
   });

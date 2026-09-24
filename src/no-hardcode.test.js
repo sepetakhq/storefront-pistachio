@@ -46,6 +46,24 @@ describe('no hardcoded parts', () => {
     expect([...new Set(missing)]).toEqual([]);
   });
 
+  // Every label the merchant can rename has one home, DEFAULT_LABELS in
+  // lib/copy.js, read through sectionText. The same words typed anywhere
+  // else would be a label the backoffice cannot reach.
+  it('keeps renameable labels in DEFAULT_LABELS only', () => {
+    const copyJs = files.find((f) => f.path === 'lib/copy.js').text;
+    const table = copyJs.slice(copyJs.indexOf('export const DEFAULT_LABELS'), copyJs.indexOf('};', copyJs.indexOf('export const DEFAULT_LABELS')));
+    const labels = [...table.matchAll(/:\s*'([^']+)'/g)].map((m) => m[1]).filter((l) => l.length > 6 && !l.includes('{'));
+    // Checkout and the order page are the shop system's own wording (step
+    // names, payment help), which shares a few words with the labels.
+    const SYSTEM = new Set(['screens/CheckoutRoute.jsx', 'screens/OrderRoute.jsx']);
+    const offenders = files.filter((f) => !SYSTEM.has(f.path)).flatMap((f) => {
+      const text = f.path === 'lib/copy.js' ? f.text.replace(table, '') : f.text;
+      return labels.filter((l) => text.includes(`'${l}'`) || text.includes(`>${l}<`) || text.includes(`\`${l} `)).map((l) => `${f.path}: ${l}`);
+    });
+    expect(labels.length).toBeGreaterThan(20);
+    expect(offenders).toEqual([]);
+  });
+
   it('names no shop, contact or brand', () => {
     // The seeded demo shops, and the templates this one was forked from.
     const banned = [/kebun/i, /camilan/i, /ayuna/i, /pasar segar/i, /lily ?alora/i, /bali linen/i, /wa\.me\/\d/, /\.local\b/, /plus jakarta/i, /@[a-z0-9-]+\.(com|id)\b/i];

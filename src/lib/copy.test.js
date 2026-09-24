@@ -153,16 +153,10 @@ describe('campaignHeadline', () => {
 });
 
 describe('featureMark', () => {
-  // The API caps a mark at four characters, so merchants type emoji; the
-  // design's line icons stand in for the ones it has.
-  it('draws a known emoji as its line icon, with or without the variation selector', () => {
-    expect(featureMark('🌿')).toEqual({ icon: 'leaf' });
-    expect(featureMark('🚚')).toEqual({ icon: 'truck' });
-    expect(featureMark('↩️')).toEqual({ icon: 'return' });
-    expect(featureMark('↩')).toEqual({ icon: 'return' });
-    expect(featureMark(' 💬 ')).toEqual({ icon: 'chat' });
-  });
-  it('draws any other mark as typed, and no mark as the leaf', () => {
+  // What the merchant typed is what shows: no emoji becomes something else.
+  it('draws every mark as typed, trimmed, and no mark as the leaf', () => {
+    expect(featureMark('🚚')).toEqual({ text: '🚚' });
+    expect(featureMark(' 💬 ')).toEqual({ text: '💬' });
     expect(featureMark('24j')).toEqual({ text: '24j' });
     expect(featureMark('🍫')).toEqual({ text: '🍫' });
     expect(featureMark('')).toEqual({ icon: 'leaf' });
@@ -180,16 +174,30 @@ describe('heroChips', () => {
     { code: 'jne', name: 'JNE', enabled: true },
     { code: 'jnt', name: 'J&T', enabled: false },
   ];
+  // The config's own substitution, as ConfigProvider wires it: withheld
+  // entirely while the offer is off.
+  const copyFor = (on) => (s) => (on ? String(s).replaceAll('{free_shipping_min}', 'Rp 150.000') : '');
+  const config = (over = {}) => ({ brand: { sections: {} }, copy: copyFor(true), freeShipping: true, paymentMethods: pays, couriers: ships, ...over });
+
   it('says only what the shop has switched on', () => {
-    const chips = heroChips({ freeShipping: true, freeShippingMinLabel: 'Rp 150.000', paymentMethods: pays, couriers: ships });
+    const chips = heroChips(config());
     expect(chips.map((c) => c.title)).toEqual(['Gratis ongkir', 'Bayar aman', '1 kurir']);
     expect(chips[0].sub).toBe('min. Rp 150.000');
     expect(chips[1].sub).toBe('QRIS · BCA VA');
     expect(chips[2].sub).toBe('JNE');
   });
   it('never promises free shipping the checkout would refuse', () => {
-    const chips = heroChips({ freeShipping: false, freeShippingMinLabel: 'Rp 150.000', paymentMethods: pays, couriers: ships });
+    const chips = heroChips(config({ freeShipping: false, copy: copyFor(false) }));
     expect(chips.map((c) => c.title)).not.toContain('Gratis ongkir');
+  });
+  it("uses the shop's labels, with the threshold filled into its note", () => {
+    const sections = { hero_chip_shipping: 'Ongkir gratis', hero_chip_shipping_note: 'belanja {free_shipping_min}', hero_chip_payment: 'Aman', hero_chip_couriers: 'Kurir andal' };
+    const chips = heroChips(config({ brand: { sections } }));
+    expect(chips.map((c) => [c.title, c.sub])).toEqual([
+      ['Ongkir gratis', 'belanja Rp 150.000'],
+      ['Aman', 'QRIS · BCA VA'],
+      ['Kurir andal', 'JNE'],
+    ]);
   });
   it('leaves out a part with nothing behind it', () => {
     expect(heroChips({})).toEqual([]);
@@ -206,6 +214,17 @@ describe('storyFacts', () => {
     // Every link is a route the contract has, or the shop's own chat.
     expect(all[0].to).toBe('/tentang');
     expect(all[2].href).toBe('https://wa.me/62811');
+  });
+  it("words each row with the shop's labels", () => {
+    const facts = storyFacts({
+      origin_city: 'Bandung', opening_hours: '08.00', whatsapp_url: 'https://wa.me/62811',
+      sections: { origin_prefix: 'Berangkat dari', origin_note: 'Lihat info', about_hours_heading: 'Buka', about_contact_heading: 'Tanya kami' },
+    });
+    expect(facts.map((f) => [f.title, f.sub])).toEqual([
+      ['Berangkat dari Bandung', 'Lihat info'],
+      ['Buka', '08.00'],
+      ['Tanya kami', ''],
+    ]);
   });
   it('drops a chat link that is not http(s)', () => {
     expect(storyFacts({ whatsapp_url: 'javascript:alert(1)' })).toEqual([]);

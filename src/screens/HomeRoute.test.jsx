@@ -19,6 +19,9 @@ afterEach(cleanup);
 
 function setup(sections, brand = {}, rest = {}) {
   Object.assign(config, { freeShipping: false, freeShippingMinLabel: '', paymentMethods: [], couriers: [], ...rest });
+  // The provider's substitution: the threshold filled in while the offer is
+  // on, the sentence withheld while it is off.
+  config.copy = (s) => (config.freeShipping ? String(s).replaceAll('{free_shipping_min}', config.freeShippingMinLabel) : '');
   config.brand = { nav: [], heroImages: [], heroStats: [], sections: {}, ...brand };
   home.data = { sections };
   return render(
@@ -83,14 +86,14 @@ describe('HomeRoute', () => {
     expect(screen.queryByText('Gratis ongkir')).toBeNull();
   });
 
-  it('draws a known feature emoji as its icon and anything else as typed', () => {
+  it('draws each feature mark as typed, and the leaf for none', () => {
     const { container } = setup([
       { id: 'f', type: 'features', features: { title: 'Kenapa kami', items: [{ mark: '🌿', title: 'Alami' }, { mark: '24j', title: 'Cepat' }, { mark: '', title: 'Tanpa' }] } },
     ]);
     expect(screen.getByRole('region', { name: 'Kenapa kami' })).toBeTruthy();
-    expect(screen.queryByText('🌿')).toBeNull();
+    expect(screen.getByText('🌿')).toBeTruthy();
     expect(screen.getByText('24j')).toBeTruthy();
-    expect(container.querySelectorAll('.pc-feature-mark svg')).toHaveLength(2);
+    expect(container.querySelectorAll('.pc-feature-mark svg')).toHaveLength(1);
   });
 
   it('links categories into the catalogue filter, with initials for a missing picture', () => {
@@ -127,6 +130,7 @@ describe('HomeRoute', () => {
     expect(screen.getByRole('heading', { name: 'Flash Sale' })).toBeTruthy();
     expect(screen.getByRole('timer')).toBeTruthy();
     expect(screen.getByRole('link', { name: /Lihat semua promo/ }).getAttribute('href')).toBe('/katalog?sale=1');
+    expect(screen.getByText('Berakhir dalam')).toBeTruthy();
 
     cleanup();
     setup([{ id: 'c', type: 'campaign', campaign: { title: 'Flash Sale', ends_at: far, products: PRODUCTS } }]);
@@ -142,11 +146,14 @@ describe('HomeRoute', () => {
   });
 
   it("prefers the shop's campaign headline and labels", () => {
-    setup([{ id: 'c', type: 'campaign', campaign: { title: 'Flash Sale', headline: 'Hemat akhir bulan', products: PRODUCTS } }], {
-      sections: { campaign_cta: 'Semua diskon' },
+    const soon = new Date(Date.now() + 5 * 3600 * 1000).toISOString();
+    setup([{ id: 'c', type: 'campaign', campaign: { title: 'Flash Sale', headline: 'Hemat akhir bulan', ends_at: soon, products: PRODUCTS } }], {
+      sections: { campaign_cta: 'Semua diskon', countdown_label: 'Sisa waktu' },
     });
     expect(screen.getByRole('heading', { name: 'Hemat akhir bulan' })).toBeTruthy();
     expect(screen.getByRole('link', { name: /Semua diskon/ })).toBeTruthy();
+    expect(screen.getByText('Sisa waktu')).toBeTruthy();
+    expect(screen.queryByText('Berakhir dalam')).toBeNull();
   });
 
   it('sends the story to the about page, with facts and stats only for what the shop filled in', () => {

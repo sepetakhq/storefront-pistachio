@@ -5,6 +5,7 @@ import Footer from './components/Footer.jsx';
 import Toast from './components/Toast.jsx';
 import CartDrawer, { DrawerProvider } from './components/CartDrawer.jsx';
 import Icon from './ui/Icon.jsx';
+import { sectionText } from './lib/copy.js';
 import UpdateBanner from './components/UpdateBanner.jsx';
 import { ConfigProvider } from '@sepetakhq/storefront-kit/config/ConfigProvider';
 import { CartProvider } from '@sepetakhq/storefront-kit/cart/CartProvider';
@@ -65,7 +66,7 @@ export function Announcement() {
   // sentence is withheld -- a bar promising free shipping the checkout would
   // refuse is worse than no bar.
   const text = announcement?.enabled ? copy(announcement.text) : '';
-  const origin = brand?.origin_city ? `Dikirim dari ${brand.origin_city}` : '';
+  const origin = brand?.origin_city ? `${sectionText(brand.sections, 'origin_prefix')} ${brand.origin_city}` : '';
   const hours = brand?.opening_hours ?? '';
   if (!text && !origin && !hours) return null;
 

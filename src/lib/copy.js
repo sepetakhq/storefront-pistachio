@@ -145,70 +145,74 @@ export function bannerTheme(name) {
     : { className: 'pc-banner is-mist', button: 'pc-btn pc-btn-primary', leaf: false };
 }
 
-// Feature marks are free text capped at four characters, so a merchant types
-// an emoji. The ones below have a line icon in the design and are drawn as
-// that icon; any other mark is drawn as typed, and no mark gets the leaf.
-const MARK_ICONS = {
-  '🌿': 'leaf', '🌱': 'leaf', '🍃': 'leaf',
-  '🧪': 'flask',
-  '🚚': 'truck', '🛵': 'truck', '📦': 'box',
-  '↩️': 'return', '↩': 'return', '🔄': 'return', '🔁': 'return',
-  '💬': 'chat', '📱': 'chat',
-  '🛡️': 'shield', '🛡': 'shield', '✅': 'shield',
-  '📍': 'pin',
-  '⏰': 'clock', '🕒': 'clock', '⏱️': 'clock',
-  '🎁': 'gift',
-  '💳': 'card',
-  '⭐': 'star', '🌟': 'star',
-};
-
 /**
- * How a feature item's mark is drawn: `{ icon }` for a mark the design has a
- * line icon for, `{ text }` for anything else, `{ icon: 'leaf' }` for none.
+ * How a feature item's mark is drawn: exactly as the merchant typed it
+ * (`{ text }`), and the leaf when there is none. No table turns a mark into
+ * something else: what the merchant typed in the editor is what the shop shows.
  */
 export function featureMark(mark) {
   const m = String(mark ?? '').trim();
-  if (!m) return { icon: 'leaf' };
-  const icon = MARK_ICONS[m] ?? MARK_ICONS[m.replace(/️/g, '')];
-  return icon ? { icon } : { text: m };
+  return m ? { text: m } : { icon: 'leaf' };
 }
 
 /**
- * The reassurances under the hero buttons, derived from the shop's own
- * configuration so they can never claim what the shop does not do: free
- * shipping only while the offer is on, and only the payment methods and
- * couriers it has switched on. Empty parts are left out.
+ * The reassurances under the hero buttons. The words are the merchant's
+ * section_copy labels (the template's own when blank); what they sit beside
+ * is the shop's configuration, so a chip can never claim what the shop does
+ * not do: free shipping only while the offer is on, and only the payment
+ * methods and couriers it has switched on. Empty parts are left out.
+ *
+ * @param {object} config useConfig(): brand.sections, copy, freeShipping,
+ *   paymentMethods, couriers
  */
-export function heroChips({ freeShipping, freeShippingMinLabel, paymentMethods = [], couriers = [] } = {}) {
+export function heroChips({ brand, copy, freeShipping, paymentMethods = [], couriers = [] } = {}) {
+  const sections = brand?.sections;
   const chips = [];
-  if (freeShipping && freeShippingMinLabel) {
-    chips.push({ icon: 'truck', title: 'Gratis ongkir', sub: `min. ${freeShippingMinLabel}` });
+  if (freeShipping && copy) {
+    // Through the config's substitution, so {free_shipping_min} is the
+    // shop's threshold; a note it withholds takes the chip with it.
+    const note = copy(sectionText(sections, 'hero_chip_shipping_note'));
+    if (note) chips.push({ icon: 'truck', title: sectionText(sections, 'hero_chip_shipping'), sub: note });
   }
   const pays = paymentMethods.filter((p) => p?.enabled && p?.name);
   if (pays.length) {
-    chips.push({ icon: 'shield', title: 'Bayar aman', sub: pays.slice(0, 2).map((p) => p.name).join(' · ') });
+    chips.push({ icon: 'shield', title: sectionText(sections, 'hero_chip_payment'), sub: pays.slice(0, 2).map((p) => p.name).join(' · ') });
   }
   const ships = couriers.filter((c) => c?.enabled && c?.name);
   if (ships.length) {
-    chips.push({ icon: 'box', title: `${ships.length} kurir`, sub: ships.slice(0, 3).map((c) => c.name).join(' · ') });
+    // The template's own wording counts them; the merchant's replaces it.
+    const own = String(sections?.hero_chip_couriers ?? '').trim();
+    chips.push({ icon: 'box', title: own || `${ships.length} kurir`, sub: ships.slice(0, 3).map((c) => c.name).join(' · ') });
   }
   return chips;
 }
 
 /**
  * The fact rows beside the story: where the shop ships from, its hours, and
- * a WhatsApp chat. Each comes from a brand field and is left out when empty.
+ * a WhatsApp chat. The data is brand fields and each row is left out when
+ * its field is empty; the words around it are section_copy labels.
  */
 export function storyFacts(brand = {}) {
+  const sections = brand.sections;
   const facts = [];
   if (brand.origin_city) {
-    facts.push({ icon: 'pin', title: `Dikirim dari ${brand.origin_city}`, sub: 'Info toko & pengiriman', to: '/tentang' });
+    facts.push({
+      icon: 'pin',
+      title: `${sectionText(sections, 'origin_prefix')} ${brand.origin_city}`,
+      sub: sectionText(sections, 'origin_note'),
+      to: '/tentang',
+    });
   }
   if (brand.opening_hours) {
-    facts.push({ icon: 'clock', title: 'Jam operasional', sub: brand.opening_hours, to: '/tentang' });
+    facts.push({ icon: 'clock', title: sectionText(sections, 'about_hours_heading'), sub: brand.opening_hours, to: '/tentang' });
   }
   if (brand.whatsapp_url && /^https?:\/\//i.test(brand.whatsapp_url)) {
-    facts.push({ icon: 'chat', title: brand.whatsapp_text || 'Tanya lewat WhatsApp', sub: brand.phone || 'Balasan cepat', href: brand.whatsapp_url });
+    facts.push({
+      icon: 'chat',
+      title: String(brand.whatsapp_text ?? '').trim() || sectionText(sections, 'about_contact_heading'),
+      sub: brand.phone || '',
+      href: brand.whatsapp_url,
+    });
   }
   return facts;
 }
@@ -243,12 +247,19 @@ export const DEFAULT_LABELS = {
   promo_title: 'Promo',
   promo_subtitle: 'Produk yang sedang diskon',
   about_address_heading: 'Alamat toko',
-  about_hours_heading: 'Jam buka',
+  about_hours_heading: 'Jam operasional',
   about_contact_heading: 'Hubungi kami',
   footer_shop_heading: 'Menu',
   footer_contact_heading: 'Kontak',
   footer_payment_heading: 'Pembayaran',
   footer_shipping_heading: 'Pengiriman',
+  footer_categories_heading: 'Kategori',
+  origin_prefix: 'Dikirim dari',
+  origin_note: 'Info toko & pengiriman',
+  hero_chip_shipping: 'Gratis ongkir',
+  hero_chip_shipping_note: 'min. {free_shipping_min}',
+  hero_chip_payment: 'Bayar aman',
+  countdown_label: 'Berakhir dalam',
 };
 
 /**

@@ -12,7 +12,7 @@ const HOUR = 60 * 60 * 1000;
  * cells per second instead of eight product cards.
  */
 
-export function CountdownCells({ until, onExpire }) {
+export function CountdownCells({ until, onExpire, label = '' }) {
   // A DETIK cell is on screen for the whole campaign, however far out the end
   // is, so this one never gets the relaxed cadence.
   const { ms, active } = useCountdown(until, { onExpire, resolution: 'second' });
@@ -24,12 +24,14 @@ export function CountdownCells({ until, onExpire }) {
   const m = Math.floor((total % 3600) / 60);
   const s = total % 60;
 
-  // The design's four deep-green cells after "Berakhir dalam".
+  // The design's four deep-green cells after the shop's label.
   return (
-    <div className="pc-countdown" role="timer" aria-label={`Berakhir dalam ${d} hari ${h} jam ${m} menit`}>
-      <span aria-hidden="true" style={{ fontSize: 13, color: 'var(--pc-body)', marginRight: 4 }}>
-        Berakhir dalam
-      </span>
+    <div className="pc-countdown" role="timer" aria-label={`${label} ${d} hari ${h} jam ${m} menit`.trim()}>
+      {label && (
+        <span aria-hidden="true" style={{ fontSize: 13, color: 'var(--pc-body)', marginRight: 4 }}>
+          {label}
+        </span>
+      )}
       {[
         [pad(d), 'hari'],
         [pad(h), 'jam'],

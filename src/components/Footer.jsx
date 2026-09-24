@@ -64,8 +64,8 @@ export default function Footer() {
         )}
 
         {cats.length > 0 && (
-          <nav className="pc-footer-col" aria-label="Kategori">
-            <h4>Kategori</h4>
+          <nav className="pc-footer-col" aria-label={sectionText(brand.sections, 'footer_categories_heading')}>
+            <h4>{sectionText(brand.sections, 'footer_categories_heading')}</h4>
             {cats.map((c) => (
               <Link key={c.key} to={`/katalog?cat=${encodeURIComponent(c.key)}`}>
                 {c.label}

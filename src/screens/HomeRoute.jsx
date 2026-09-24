@@ -381,7 +381,13 @@ function Campaign({ campaign }) {
             {campaign.badge && <span className="pc-badge">{campaign.badge}</span>}
             <h2 style={{ margin: 0, fontWeight: 700, fontSize: 'clamp(24px, 2.6vw, 30px)' }}>{heading}</h2>
           </div>
-          {ticking && <CountdownCells until={campaign.ends_at} onExpire={() => qc.invalidateQueries({ queryKey: qk.home })} />}
+          {ticking && (
+            <CountdownCells
+              until={campaign.ends_at}
+              label={sectionText(brand.sections, 'countdown_label')}
+              onExpire={() => qc.invalidateQueries({ queryKey: qk.home })}
+            />
+          )}
         </div>
         {products.length > 0 && (
           <div className="pc-grid">
