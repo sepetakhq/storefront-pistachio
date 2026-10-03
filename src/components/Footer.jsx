@@ -5,7 +5,7 @@ import { useCategories } from '@sepetakhq/storefront-kit/hooks/queries';
 
 import { BrandMark } from './BrandMark.jsx';
 import Icon from '../ui/Icon.jsx';
-import { footerLinks, sectionText, socialAbbr, socialLabel } from '../lib/copy.js';
+import { chips, footerLinks, sectionText, socialAbbr, socialLabel } from '../lib/copy.js';
 
 /**
  * The design's dark footer, from config alone: the mark, tagline and
@@ -112,11 +112,17 @@ export default function Footer() {
             {payments.length > 0 && (
               <span style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
                 <span>{sectionText(brand.sections, 'footer_payment_heading')}:</span>
-                {payments.map((m) => (
-                  <span key={m.code} className="pc-footer-chip">
-                    {m.name}
-                  </span>
-                ))}
+                {chips(payments).map((m) =>
+                  m.logo_url ? (
+                    <span key={m.code} className="pc-footer-chip pc-logo-chip" title={m.name}>
+                      <img src={m.logo_url} alt={m.name} loading="lazy" />
+                    </span>
+                  ) : (
+                    <span key={m.code} className="pc-footer-chip">
+                      {m.name}
+                    </span>
+                  ),
+                )}
               </span>
             )}
           </div>

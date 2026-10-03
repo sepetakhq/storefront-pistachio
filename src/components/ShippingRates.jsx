@@ -175,6 +175,8 @@ export function RateTile({ option, free, selected, onClick }) {
         </span>
       </span>
 
+      {option.courier_logo_url ? <img className="pc-choice-logo" src={option.courier_logo_url} alt="" /> : null}
+
       <span style={{ textAlign: 'right', whiteSpace: 'nowrap' }}>
         {free ? (
           <>

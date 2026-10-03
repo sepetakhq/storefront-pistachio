@@ -46,6 +46,21 @@ describe('RateTile', () => {
       render(<RateTile option={option({ courier_code: undefined })} onClick={() => {}} />),
     ).not.toThrow();
   });
+
+  // The badge is the server's; the name stays beside it, so the picture is
+  // decorative and a row without one simply has none.
+  it("draws the server's courier badge beside the name, and none when it sends none", () => {
+    const { container } = render(
+      <RateTile option={option({ courier_name: 'JNE', courier_logo_url: 'http://api.test/logos/courier/jne.svg' })} onClick={() => {}} />,
+    );
+    const img = container.querySelector('img.pc-choice-logo');
+    expect(img.getAttribute('src')).toBe('http://api.test/logos/courier/jne.svg');
+    expect(img.getAttribute('alt')).toBe('');
+    expect(screen.getByText(/JNE/)).toBeTruthy();
+    cleanup();
+    const bare = render(<RateTile option={option({ courier_name: 'JNE' })} onClick={() => {}} />);
+    expect(bare.container.querySelector('img')).toBeNull();
+  });
 });
 
 describe('RateProblem', () => {

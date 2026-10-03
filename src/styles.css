@@ -116,6 +116,9 @@ h1, h2, h3, h4 { font-family: var(--pc-display); color: var(--pc-deep); }
 .pc-choice { display: flex; justify-content: space-between; align-items: center; gap: 12px; width: 100%; text-align: left; padding: 14px 16px; border-radius: 10px; border: 1.5px solid var(--pc-line); background: var(--pc-white); color: var(--pc-ink); }
 .pc-choice[aria-checked="true"] { border-color: var(--pc-green); background: var(--pc-soft); }
 .pc-choice:disabled { opacity: .55; }
+/* The method's or courier's badge, beside the price: names stay aligned whether a row has one or not. */
+.pc-choice-logo { display: block; height: 20px; width: auto; max-width: 64px; object-fit: contain; flex: none; }
+@media (max-width: 480px) { .pc-choice-logo { height: 16px; max-width: 48px; } }
 .pc-radio { width: 18px; height: 18px; border-radius: 999px; border: 2px solid var(--pc-line-2); display: grid; place-items: center; flex: none; }
 .pc-choice[aria-checked="true"] .pc-radio { border-color: var(--pc-green); }
 .pc-choice[aria-checked="true"] .pc-radio::after { content: ''; width: 8px; height: 8px; border-radius: 999px; background: var(--pc-green); }
@@ -225,6 +228,9 @@ body[data-menu="1"] { overflow: hidden; }
 .pc-chip { display: flex; align-items: center; gap: 10px; }
 .pc-chip b { display: block; font-size: 14px; font-weight: 600; color: var(--pc-deep); }
 .pc-chip span { display: block; font-size: 13px; color: var(--pc-muted); }
+/* The server's badges in place of the names; a name without one stays text. */
+.pc-chip .pc-chip-marks { display: flex; align-items: center; flex-wrap: wrap; gap: 4px 10px; margin-top: 3px; }
+.pc-chip-marks img { display: block; height: 16px; width: auto; max-width: 76px; object-fit: contain; }
 
 .pc-strip { background: var(--pc-line); border: 1px solid var(--pc-line); border-radius: 12px; overflow: hidden; display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1px; }
 .pc-strip > * { background: var(--pc-tint); }
@@ -297,7 +303,10 @@ body[data-menu="1"] { overflow: hidden; }
 .pc-footer-col { display: flex; flex-direction: column; gap: 12px; font-size: 14px; }
 .pc-footer-bottom { border-top: 1px solid var(--pc-foot-line); }
 .pc-footer-bottom > div { max-width: var(--pc-max); margin: 0 auto; padding: 18px var(--pc-gutter); display: flex; justify-content: space-between; align-items: center; gap: 12px 24px; flex-wrap: wrap; font-size: 13px; color: var(--pc-foot-dim); }
-.pc-footer-chip { border: 1px solid var(--pc-foot-ring); border-radius: 4px; padding: 2px 8px; color: var(--pc-mist); }
+.pc-footer-chip { display: inline-flex; align-items: center; min-height: 24px; border: 1px solid var(--pc-foot-ring); border-radius: 4px; padding: 2px 8px; color: var(--pc-mist); }
+/* A badge sits on the page's own light green-white: a full-colour mark is unreadable on the forest. */
+.pc-logo-chip { background: var(--pc-soft); border-color: var(--pc-soft); }
+.pc-logo-chip img { display: block; height: 16px; width: auto; max-width: 76px; object-fit: contain; }
 .pc-social { width: 36px; height: 36px; border-radius: 999px; border: 1px solid var(--pc-foot-ring); display: grid; place-items: center; font-size: 11px; font-weight: 700; }
 .pc-social:hover { background: var(--pc-green); }
 @media (max-width: 519px) { .pc-footer-wide { grid-column: 1 / -1; } }

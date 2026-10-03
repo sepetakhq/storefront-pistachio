@@ -86,6 +86,25 @@ describe('HomeRoute', () => {
     expect(screen.queryByText('Gratis ongkir')).toBeNull();
   });
 
+  it("draws the server's badges in the hero chips, and names it has none for as text", () => {
+    const jne = 'http://api.test/logos/courier/jne.svg';
+    setup([HERO], {}, {
+      paymentMethods: [{ code: 'QRIS', name: 'QRIS', enabled: true }],
+      couriers: [
+        { code: 'jne', name: 'JNE REG', enabled: true, logo_url: jne },
+        { code: 'jne', name: 'JNE YES', enabled: true, logo_url: jne },
+        { code: 'toko', name: 'Kurir Toko', enabled: true },
+      ],
+    });
+    expect(screen.getByRole('img', { name: 'JNE REG' }).getAttribute('src')).toBe(jne);
+    expect(screen.queryByRole('img', { name: 'JNE YES' })).toBeNull();
+    expect(screen.getByText('Kurir Toko')).toBeTruthy();
+    // A chip with no badge at all reads exactly as before.
+    expect(screen.getByText('QRIS')).toBeTruthy();
+    // The count is still every courier switched on, badge or not.
+    expect(screen.getByText('3 kurir')).toBeTruthy();
+  });
+
   it('draws each feature mark as typed, and the leaf for none', () => {
     const { container } = setup([
       { id: 'f', type: 'features', features: { title: 'Kenapa kami', items: [{ mark: '🌿', title: 'Alami' }, { mark: '24j', title: 'Cepat' }, { mark: '', title: 'Tanpa' }] } },
