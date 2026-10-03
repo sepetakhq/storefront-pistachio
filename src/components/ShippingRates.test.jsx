@@ -85,6 +85,17 @@ describe('RateProblem', () => {
     expect(screen.getByText('Ongkir untuk produk ini belum bisa dihitung.')).toBeTruthy();
   });
 
+  // A shop that spent its monthly live rate checks: no retry, and the
+  // server's own message, which tells the buyer to contact the seller.
+  it('says the rate checks are used up without offering a retry', () => {
+    const msg = 'Ongkir otomatis toko ini sedang tidak tersedia. Hubungi penjual untuk melanjutkan pesanan.';
+    const err = new ApiError(409, 'rate_checks_exhausted', msg);
+    render(<RateProblem error={err} onRetry={() => {}} onEdit={() => {}} />);
+    expect(screen.getByText('Ongkir otomatis sedang tidak tersedia.')).toBeTruthy();
+    expect(screen.getByText(msg)).toBeTruthy();
+    expect(screen.queryByText('Hitung ulang')).toBeNull();
+  });
+
   it('treats an empty courier list as retryable', () => {
     // options.length === 0 renders this panel with error=null.
     render(<RateProblem error={null} onRetry={() => {}} onEdit={() => {}} />);

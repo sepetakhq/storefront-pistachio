@@ -219,14 +219,22 @@ export function RateProblem({ error, onRetry, onEdit }) {
   // while rendering the error panel -- so the one path that exists to explain
   // a failure crashed exactly when it was needed.
   const retryable = !error || status === 503 || status >= 500 || error?.isNetwork;
+  // The shop has spent its live rate checks for the month: waiting will not
+  // help and another destination might not either, so say what the server
+  // says -- it names the way out (contact the seller).
+  const exhausted = !retryable && code === 'rate_checks_exhausted';
   const heading = retryable
     ? 'Ongkir belum bisa dihitung sekarang.'
-    : code === 'shipping_unavailable'
+    : exhausted
+      ? 'Ongkir otomatis sedang tidak tersedia.'
+      : code === 'shipping_unavailable'
       ? 'Ongkir untuk produk ini belum bisa dihitung.'
       : 'Belum ada kurir yang melayani tujuan ini.';
   const body = retryable
     ? 'Coba lagi sebentar lagi.'
-    : code === 'shipping_unavailable'
+    : exhausted
+      ? error?.message || 'Hubungi penjual untuk melanjutkan pesanan.'
+      : code === 'shipping_unavailable'
       ? 'Hubungi penjual ya — datanya belum lengkap.'
       : 'Coba pilih kecamatan lain yang berdekatan.';
 
