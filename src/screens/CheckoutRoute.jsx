@@ -524,7 +524,7 @@ function Checkout({ onPlaced }) {
             ) : (
               <div style={{ display: 'grid', gap: 10 }}>
                 {couriers.map((c) => (
-                  <OptionTile key={c.code} selected={courier === c.code} onClick={() => setCourier(c.code)} aside={<strong>{fmt(c.cost)}</strong>}>
+                  <OptionTile key={c.code} selected={courier === c.code} onClick={() => setCourier(c.code)} logo={c.logo_url} aside={<strong>{fmt(c.cost)}</strong>}>
                     <strong style={{ fontSize: 15 }}>{c.name}</strong>
                     {c.eta ? <span style={{ color: 'var(--pc-muted)', fontSize: 13 }}>Estimasi {c.eta}</span> : null}
                   </OptionTile>
@@ -550,6 +550,7 @@ function Checkout({ onPlaced }) {
                     selected={method === p.code}
                     disabled={!fits}
                     onClick={() => fits && setMethod(p.code)}
+                    logo={p.logo_url}
                     aside={<span style={{ color: 'var(--pc-muted)', fontSize: 13 }}>{fee > 0 ? `+${fmt(fee)}` : 'Tanpa biaya'}</span>}
                   >
                     <strong style={{ fontSize: 15 }}>{p.name}</strong>
@@ -928,14 +929,18 @@ function Review({
  * whose cart is too large for a virtual account needs to see that the method
  * exists and why it is unavailable, or they will conclude the shop is broken.
  */
-function OptionTile({ selected, onClick, disabled, aside, children }) {
+function OptionTile({ selected, onClick, disabled, aside, logo, children }) {
   return (
     <button type="button" role="radio" aria-checked={selected} onClick={onClick} disabled={disabled} className="pc-choice">
       <span style={{ display: 'flex', alignItems: 'center', gap: 12, minWidth: 0 }}>
         <span className="pc-radio" aria-hidden="true" />
         <span style={{ display: 'flex', flexDirection: 'column', gap: 2, minWidth: 0 }}>{children}</span>
       </span>
-      {aside}
+      <span style={{ display: 'flex', alignItems: 'center', gap: 14, flex: 'none' }}>
+        {/* Decorative: the name beside it already says what it is. */}
+        {logo ? <img className="pc-choice-logo" src={logo} alt="" /> : null}
+        {aside}
+      </span>
     </button>
   );
 }

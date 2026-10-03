@@ -142,7 +142,15 @@ function Hero({ hero, hasCats }) {
                   <Icon name={c.icon} size={24} strokeWidth={1.6} style={{ color: 'var(--pc-green)' }} />
                   <span>
                     <b>{c.title}</b>
-                    <span>{c.sub}</span>
+                    {c.items?.some((x) => x.logo_url) ? (
+                      <span className="pc-chip-marks">
+                        {c.items.map((x) =>
+                          x.logo_url ? <img key={x.logo_url} src={x.logo_url} alt={x.name} loading="lazy" /> : <span key={x.name}>{x.name}</span>,
+                        )}
+                      </span>
+                    ) : (
+                      <span>{c.sub}</span>
+                    )}
                   </span>
                 </li>
               ))}

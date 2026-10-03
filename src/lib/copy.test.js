@@ -199,6 +199,22 @@ describe('heroChips', () => {
       ['Kurir andal', 'JNE'],
     ]);
   });
+  // VA BCA and Transfer BCA are one badge, so the two places go to two marks.
+  it('hands over the named items once per badge, so the hero can draw them', () => {
+    const bca = 'http://api.test/logos/payment/bca.svg';
+    const chips = heroChips(config({
+      freeShipping: false,
+      copy: copyFor(false),
+      paymentMethods: [
+        { code: 'BCA', name: 'VA BCA', enabled: true, logo_url: bca },
+        { code: 'MANUAL_BCA', name: 'Transfer BCA', enabled: true, logo_url: bca },
+        { code: 'QRIS', name: 'QRIS', enabled: true },
+      ],
+    }));
+    expect(chips[0].items.map((p) => p.name)).toEqual(['VA BCA', 'QRIS']);
+    expect(chips[0].sub).toBe('VA BCA · QRIS');
+    expect(chips[1].items.map((c) => c.name)).toEqual(['JNE']);
+  });
   it('leaves out a part with nothing behind it', () => {
     expect(heroChips({})).toEqual([]);
     expect(heroChips({ paymentMethods: [{ enabled: false, name: 'x' }], couriers: [] })).toEqual([]);

@@ -61,6 +61,23 @@ describe('Footer', () => {
     expect(screen.getByRole('link', { name: /0812-0000/ }).getAttribute('href')).toBe('tel:08120000');
   });
 
+  it("draws the server's badge in place of a name, once per badge, and keeps names it has none for", () => {
+    const bca = 'http://api.test/logos/payment/bca.svg';
+    const { container } = setup({}, {
+      payments: [
+        { code: 'BCA', name: 'VA BCA', enabled: true, logo_url: bca },
+        { code: 'MANUAL_BCA', name: 'Transfer BCA', enabled: true, logo_url: bca },
+        { code: 'MANUAL_BANK_1', name: 'Transfer SeaBank', enabled: true },
+      ],
+    });
+    const imgs = [...container.querySelectorAll('.pc-logo-chip img')];
+    expect(imgs.map((i) => i.getAttribute('src'))).toEqual([bca]);
+    // The first name behind a badge is how it is read aloud.
+    expect(screen.getByRole('img', { name: 'VA BCA' })).toBeTruthy();
+    expect(screen.queryByRole('img', { name: 'Transfer BCA' })).toBeNull();
+    expect(screen.getByText('Transfer SeaBank')).toBeTruthy();
+  });
+
   it('draws no column for what the shop has not got', () => {
     setup({ nav: [], address_line1: '', phone: '', email: '', social_links: [], copyright: '' }, { cats: [], payments: [] });
     for (const t of ['Kategori', 'Kontak']) expect(screen.queryByRole('heading', { name: t })).toBeNull();

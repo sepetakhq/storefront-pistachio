@@ -167,24 +167,36 @@ export function featureMark(mark) {
  */
 export function heroChips({ brand, copy, freeShipping, paymentMethods = [], couriers = [] } = {}) {
   const sections = brand?.sections;
-  const chips = [];
+  const out = [];
   if (freeShipping && copy) {
     // Through the config's substitution, so {free_shipping_min} is the
     // shop's threshold; a note it withholds takes the chip with it.
     const note = copy(sectionText(sections, 'hero_chip_shipping_note'));
-    if (note) chips.push({ icon: 'truck', title: sectionText(sections, 'hero_chip_shipping'), sub: note });
+    if (note) out.push({ icon: 'truck', title: sectionText(sections, 'hero_chip_shipping'), sub: note });
   }
-  const pays = paymentMethods.filter((p) => p?.enabled && p?.name);
+  // `items` are what `sub` names, for drawing the server's badges in its place.
+  const pays = chips(paymentMethods.filter((p) => p?.enabled && p?.name)).slice(0, 2);
   if (pays.length) {
-    chips.push({ icon: 'shield', title: sectionText(sections, 'hero_chip_payment'), sub: pays.slice(0, 2).map((p) => p.name).join(' · ') });
+    out.push({ icon: 'shield', title: sectionText(sections, 'hero_chip_payment'), sub: pays.map((p) => p.name).join(' · '), items: pays });
   }
   const ships = couriers.filter((c) => c?.enabled && c?.name);
   if (ships.length) {
     // The template's own wording counts them; the merchant's replaces it.
     const own = String(sections?.hero_chip_couriers ?? '').trim();
-    chips.push({ icon: 'box', title: own || `${ships.length} kurir`, sub: ships.slice(0, 3).map((c) => c.name).join(' · ') });
+    const shown = chips(ships).slice(0, 3);
+    out.push({ icon: 'box', title: own || `${ships.length} kurir`, sub: shown.map((c) => c.name).join(' · '), items: shown });
   }
-  return chips;
+  return out;
+}
+
+/**
+ * One chip per badge: "VA BCA" and "Transfer BCA", or JNE REG and JNE YES,
+ * are the same mark to a buyer checking whether the shop takes their bank or
+ * ships with their courier. A name the platform has no badge for stays text.
+ */
+export function chips(items) {
+  const seen = new Set();
+  return items.filter((x) => !x.logo_url || (!seen.has(x.logo_url) && seen.add(x.logo_url)));
 }
 
 /**
