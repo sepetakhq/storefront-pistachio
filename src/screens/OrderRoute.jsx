@@ -195,7 +195,7 @@ export default function OrderRoute() {
             shows what came off. Both rows appear only when there is something
             to say, which for most orders is neither.
           */}
-          {order.discount_total > 0 ? (
+          {order.discount_total - (order.points_discount ?? 0) > 0 ? (
             <Row
               // The code wins the label when there was one. It is the part of
               // the discount the buyer chose and typed, and the only part they
@@ -207,8 +207,12 @@ export default function OrderRoute() {
                     ? `Diskon · ${order.promotion_name}`
                     : 'Diskon'
               }
-              value={`−${fmt(order.discount_total)}`}
+              value={`−${fmt(order.discount_total - (order.points_discount ?? 0))}`}
             />
+          ) : null}
+          {/* Loyalty points spent at the shop's till, apart from the promotion. */}
+          {order.points_discount > 0 ? (
+            <Row label={`Poin (${order.points_used})`} value={`−${fmt(order.points_discount)}`} />
           ) : null}
           <Row
             label={
@@ -248,6 +252,10 @@ export default function OrderRoute() {
             <span>Total</span>
             <span style={{ color: 'var(--pc-green)' }}>{fmt(order.total)}</span>
           </div>
+          {/* What the order credited to the buyer's phone, once paid. */}
+          {order.points_earned > 0 ? (
+            <Row label="Poin didapat" value={`+${order.points_earned} poin`} />
+          ) : null}
         </div>
         {order.awb ? (
           <div style={{ marginTop: 16, fontSize: 14 }}>
