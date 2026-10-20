@@ -11,7 +11,7 @@ afterEach(cleanup);
 // network request and a QueryClient to answer a question about rendering.
 vi.mock('@sepetakhq/storefront-kit/config/ConfigProvider', () => ({
   useConfig: () => ({
-    brand: { whatsapp_url: 'https://wa.me/6285641232507' },
+    brand: { whatsapp_url: 'https://wa.me/6281234567890' },
     payment: { qris_merchant_name: 'LILY ALORA', qris_nmid: 'ID10261234567', account_holder: 'LILY ALORA' },
   }),
 }));
