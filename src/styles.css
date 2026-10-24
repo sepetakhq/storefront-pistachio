@@ -303,6 +303,9 @@ body[data-menu="1"] { overflow: hidden; }
 .pc-footer-col { display: flex; flex-direction: column; gap: 12px; font-size: 14px; }
 .pc-footer-bottom { border-top: 1px solid var(--pc-foot-line); }
 .pc-footer-bottom > div { max-width: var(--pc-max); margin: 0 auto; padding: 18px var(--pc-gutter); display: flex; justify-content: space-between; align-items: center; gap: 12px 24px; flex-wrap: wrap; font-size: 13px; color: var(--pc-foot-dim); }
+.pc-footer-sign { display: flex; flex-wrap: wrap; gap: 4px 16px; }
+.pc-footer a.pc-footer-badge { font-size: 12px; color: var(--pc-foot-dim); white-space: nowrap; }
+.pc-footer a.pc-footer-badge:hover { color: var(--pc-white); }
 .pc-footer-chip { display: inline-flex; align-items: center; min-height: 24px; border: 1px solid var(--pc-foot-ring); border-radius: 4px; padding: 2px 8px; color: var(--pc-mist); }
 /* A badge sits on the page's own light green-white: a full-colour mark is unreadable on the forest. */
 .pc-logo-chip { background: var(--pc-soft); border-color: var(--pc-soft); }

@@ -13,7 +13,7 @@
     "publish:local": "SF_TEMPLATE=pistachio SF_BUCKET=sepetak-storefronts SF_ENDPOINT=http://localhost:9000 SF_CDN_BASE=http://localhost:9000/sepetak-storefronts SF_BUILD=local-$(date +%s) AWS_ACCESS_KEY_ID=minioadmin AWS_SECRET_ACCESS_KEY=minioadmin AWS_REGION=us-east-1 sf-publish"
   },
   "dependencies": {
-    "@sepetakhq/storefront-kit": "^0.1.4",
+    "@sepetakhq/storefront-kit": "^0.2.0",
     "@tanstack/react-query": "^5.102.6",
     "qrcode": "^1.5.4",
     "react": "^18.3.1",

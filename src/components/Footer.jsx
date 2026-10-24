@@ -15,7 +15,10 @@ import { chips, footerLinks, sectionText, socialAbbr, socialLabel } from '../lib
  * footer rather than headings over nothing.
  */
 export default function Footer() {
-  const { brand, paymentMethods } = useConfig();
+  const { brand, paymentMethods, tenant } = useConfig();
+  // The platform's mark, on the plans that carry it. Absent on an older API
+  // version, which strips the field, so nothing is drawn.
+  const badge = tenant?.sepetak_badge === true;
   const { data: categories } = useCategories();
   const payments = (paymentMethods ?? []).filter((m) => m.enabled && m.name);
   const socials = (brand.social_links ?? []).filter((s) => s.url);
@@ -105,10 +108,17 @@ export default function Footer() {
         )}
       </div>
 
-      {(brand.copyright || payments.length > 0) && (
+      {(brand.copyright || payments.length > 0 || badge) && (
         <div className="pc-footer-bottom">
           <div>
-            <span>{brand.copyright || ''}</span>
+            <span className="pc-footer-sign">
+              {brand.copyright && <span>{brand.copyright}</span>}
+              {badge && (
+                <a href="https://sepetak.com/?ref=toko" target="_blank" rel="noopener" className="pc-footer-badge">
+                  Dibuat dengan Sepetak
+                </a>
+              )}
+            </span>
             {payments.length > 0 && (
               <span style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
                 <span>{sectionText(brand.sections, 'footer_payment_heading')}:</span>
