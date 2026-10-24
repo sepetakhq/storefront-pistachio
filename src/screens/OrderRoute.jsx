@@ -11,7 +11,7 @@ import { useConfig } from '@sepetakhq/storefront-kit/config/ConfigProvider';
 import { Tile } from '../components/Tile.jsx';
 import { courierName } from '../lib/copy.js';
 import { serverNow } from '@sepetakhq/storefront-kit/api/client';
-import { fmt, fmtDate, fmtDateTime } from '@sepetakhq/storefront-kit/shared/format';
+import { fmt, fmtDate, fmtDateTime, formatQty } from '@sepetakhq/storefront-kit/shared/format';
 import { claimPayment, reopenPayment } from '@sepetakhq/storefront-kit/api/endpoints';
 import { qk } from '@sepetakhq/storefront-kit/api/queryKeys';
 import {
@@ -181,7 +181,7 @@ export default function OrderRoute() {
                   <div style={{ color: 'var(--pc-ink)', fontSize: 13 }}>{l.variant_label}</div>
                 ) : null}
                 <div style={{ color: 'var(--pc-body)', fontSize: 13 }}>
-                  {fmt(l.unit_price)} × {l.qty}
+                  {fmt(l.unit_price)} × {formatQty(l.qty, l.unit)}
                 </div>
               </div>
               <strong style={{ fontSize: 14 }}>{fmt(l.line_total)}</strong>

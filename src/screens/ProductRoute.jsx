@@ -20,7 +20,8 @@ import {
 } from '@sepetakhq/storefront-kit/lib/variants';
 import { useConfig } from '@sepetakhq/storefront-kit/config/ConfigProvider';
 import { useToast } from '@sepetakhq/storefront-kit/ui/ToastProvider';
-import { fmt, fmtClock, paragraphs } from '@sepetakhq/storefront-kit/shared/format';
+import { fmt, fmtClock, formatQty, lineAmount, paragraphs } from '@sepetakhq/storefront-kit/shared/format';
+import { isScaled, qtyLimits, stepQty } from '@sepetakhq/storefront-kit/shared/qty';
 
 import Icon from '../ui/Icon.jsx';
 import { useDrawer } from '../components/CartDrawer.jsx';
@@ -106,7 +107,8 @@ function ProductView({ product, onOpen }) {
   const drawer = useDrawer();
 
   const [active, setActive] = useState(0);
-  const [qty, setQty] = useState(1);
+  const limits = qtyLimits(product);
+  const [qty, setQty] = useState(limits.min);
   const [broken, setBroken] = useState(() => new Set());
 
   // Which value is picked on each axis. Nothing is guessed beyond what
@@ -124,7 +126,7 @@ function ProductView({ product, onOpen }) {
     // A pick can change the photo and the stock ceiling, so the gallery and
     // the quantity restart from the top.
     setActive(0);
-    setQty(1);
+    setQty(limits.min);
   };
 
   // The panel's three sections, resolved and then substituted, before anything
@@ -192,7 +194,7 @@ function ProductView({ product, onOpen }) {
 
   const off = discountPct(sellable);
   const unit = sellable.price;
-  const cta = `${product.preorder ? 'Pre-order' : 'Tambah ke keranjang'} · ${fmt(unit * qty)}`;
+  const cta = `${product.preorder ? 'Pre-order' : 'Tambah ke keranjang'} · ${fmt(lineAmount(unit, qty, limits.unit))}`;
   const ask = askLink(brand.whatsapp_url, askMessage(sectionText(sections, 'product_ask_message'), product.name));
 
   return (
@@ -266,7 +268,10 @@ function ProductView({ product, onOpen }) {
                 {/* "mulai" until a variant is picked, when there is a range to
                     speak of; the exact price the moment one is. */}
                 {needsChoice && isPriceRange(product) && <span style={{ fontSize: 14, color: 'var(--pc-muted)' }}>mulai</span>}
-                <span style={{ fontSize: 26, fontWeight: 700, color: off > 0 ? 'var(--pc-sale)' : 'var(--pc-ink)' }}>{fmt(needsChoice ? product.price : sellable.price)}</span>
+                <span style={{ fontSize: 26, fontWeight: 700, color: off > 0 ? 'var(--pc-sale)' : 'var(--pc-ink)' }}>
+                  {fmt(needsChoice ? product.price : sellable.price)}
+                  {isScaled(limits.unit) ? <span style={{ fontSize: 15, fontWeight: 600, color: 'var(--pc-muted)' }}>/{limits.unit}</span> : null}
+                </span>
                 {off > 0 && <s style={{ fontSize: 16, color: 'var(--pc-muted-2)' }}>{fmt(sellable.compare_at_price)}</s>}
               </div>
               {note && (
@@ -284,13 +289,13 @@ function ProductView({ product, onOpen }) {
 
             <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', alignItems: 'center' }}>
               <div style={{ display: 'flex', alignItems: 'center', height: 50, border: '1px solid var(--pc-line-2)', borderRadius: 8, background: 'var(--pc-white)' }}>
-                <button type="button" className="hv-cream" onClick={() => setQty((q) => Math.max(1, q - 1))} disabled={disabled || qty <= 1} aria-label="Kurangi jumlah" style={stepper}>
+                <button type="button" className="hv-cream" onClick={() => setQty((q) => Math.max(limits.min, stepQty(q, -1, limits)))} disabled={disabled || qty <= limits.min} aria-label="Kurangi jumlah" style={stepper}>
                   −
                 </button>
                 <output aria-live="polite" style={{ minWidth: 32, textAlign: 'center', fontSize: 16, fontWeight: 700 }}>
-                  {qty}
+                  {formatQty(qty, limits.unit)}
                 </output>
-                <button type="button" className="hv-cream" onClick={() => setQty((q) => Math.min(max, q + 1))} disabled={disabled || qty >= max} aria-label="Tambah jumlah" style={stepper}>
+                <button type="button" className="hv-cream" onClick={() => setQty((q) => Math.min(max, stepQty(q, 1, limits)))} disabled={disabled || stepQty(qty, 1, limits) > max} aria-label="Tambah jumlah" style={stepper}>
                   +
                 </button>
               </div>

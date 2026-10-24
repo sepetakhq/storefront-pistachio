@@ -3,13 +3,14 @@ import { Link } from 'react-router-dom';
 import { Img, SIZES } from '../ui/Img.jsx';
 import { Tile } from '../components/Tile.jsx';
 import { EmptyState, InlineError, Skeleton } from '../ui/states.jsx';
-import { useCart, MAX_QTY } from '@sepetakhq/storefront-kit/cart/CartProvider';
+import { useCart } from '@sepetakhq/storefront-kit/cart/CartProvider';
+import { stepQty } from '@sepetakhq/storefront-kit/shared/qty';
 import { useCartLines } from '@sepetakhq/storefront-kit/cart/useCartLines';
 import { useConfig } from '@sepetakhq/storefront-kit/config/ConfigProvider';
 import { orderNote, shortNote } from '@sepetakhq/storefront-kit/lib/preorder';
 import { blockerNotice, windowNote } from '@sepetakhq/storefront-kit/lib/availability';
 import { didPurgeLegacy } from '@sepetakhq/storefront-kit/lib/storage';
-import { fmt } from '@sepetakhq/storefront-kit/shared/format';
+import { fmt, formatQty } from '@sepetakhq/storefront-kit/shared/format';
 
 import { freeShippingProgress } from '../lib/copy.js';
 
@@ -216,7 +217,7 @@ function CartLine({ line, onQty, onRemove, onNavigate }) {
           <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--pc-note)' }}>{note.text}</span>
         ) : status === 'overstock' ? (
           <span style={{ fontSize: 13, color: 'var(--pc-note)' }}>
-            Tersisa {available}.{' '}
+            Tersisa {formatQty(available, line.limits.unit)}.{' '}
             <button type="button" onClick={() => onQty(key, available)} style={{ color: 'var(--pc-green)', fontWeight: 700 }}>
               Sesuaikan
             </button>
@@ -227,15 +228,15 @@ function CartLine({ line, onQty, onRemove, onNavigate }) {
 
         {!blocked && (
           <div style={{ display: 'flex', alignItems: 'center', border: '1px solid var(--pc-line-2)', borderRadius: 6, alignSelf: 'flex-start', marginTop: 2 }}>
-            <button type="button" aria-label="Kurangi jumlah" disabled={item.qty <= 1} onClick={() => onQty(key, item.qty - 1)} style={qtyButton}>
+            <button type="button" aria-label="Kurangi jumlah" onClick={() => { const n = stepQty(item.qty, -1, line.limits); return n === 0 ? onRemove(key) : onQty(key, n); }} style={qtyButton}>
               −
             </button>
-            <span style={{ minWidth: 26, textAlign: 'center', fontSize: 14, fontWeight: 600 }}>{item.qty}</span>
+            <span style={{ minWidth: 26, textAlign: 'center', fontSize: 14, fontWeight: 600 }}>{formatQty(item.qty, line.limits.unit)}</span>
             <button
               type="button"
               aria-label="Tambah jumlah"
-              disabled={item.qty >= Math.min(MAX_QTY, available)}
-              onClick={() => onQty(key, item.qty + 1)}
+              disabled={stepQty(item.qty, 1, line.limits) > Math.min(line.limits.max, available)}
+              onClick={() => onQty(key, stepQty(item.qty, 1, line.limits))}
               style={qtyButton}
             >
               +

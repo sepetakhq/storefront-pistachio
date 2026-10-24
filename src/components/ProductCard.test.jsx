@@ -99,6 +99,16 @@ describe('ProductCard', () => {
     expect(cart.remove).toHaveBeenCalledWith('p1:');
   });
 
+  it('steps a weighed line by qty_step and prints it in kg', () => {
+    cart.items = [{ productId: 'p1', variantId: null, qty: 500 }];
+    card(product({ unit: 'kg', qty_step: 250, qty_min: 500, stock: 5000 }));
+    expect(screen.getByText('0,5 kg')).toBeTruthy();
+    fireEvent.click(screen.getByRole('button', { name: 'Tambah' }));
+    expect(cart.setQty).toHaveBeenCalledWith('p1:', 750);
+    fireEvent.click(screen.getByRole('button', { name: 'Kurangi' }));
+    expect(cart.remove).toHaveBeenCalledWith('p1:');
+  });
+
   it('sends a variant product to its page instead of adding', () => {
     card(product({ has_variants: true, price_max: 249000 }));
     const link = screen.getByRole('link', { name: 'Pilih varian' });

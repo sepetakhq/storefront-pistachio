@@ -387,3 +387,31 @@ describe('ProductRoute shop labels', () => {
   });
 });
 });
+
+describe('ProductRoute sale unit', () => {
+  afterEach(() => {
+    cartCalls.length = 0;
+  });
+
+  it('prices per kg and steps a weighed product from its minimum by qty_step', () => {
+    withProduct({ price: 40000, unit: 'kg', qty_step: 100, qty_min: 500, stock: 5000 });
+    panel();
+    expect(screen.getByText('/kg')).toBeTruthy();
+    expect(screen.getByText('0,5 kg')).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'Kurangi jumlah' }).disabled).toBe(true);
+    fireEvent.click(screen.getByRole('button', { name: 'Tambah jumlah' }));
+    expect(screen.getByText('0,6 kg')).toBeTruthy();
+    // Rp 40.000/kg × 600 g, never × 600.
+    fireEvent.click(screen.getByRole('button', { name: `Tambah ke keranjang · ${fmt(24000)}` }));
+    expect(cartCalls[0][1]).toBe(600);
+  });
+
+  it('leaves a product sold by the piece as it was', () => {
+    withProduct({ stock: 40 });
+    panel();
+    expect(screen.queryByText('/kg')).toBeNull();
+    expect(screen.getByText('1')).toBeTruthy();
+    fireEvent.click(screen.getByRole('button', { name: 'Tambah jumlah' }));
+    expect(screen.getByText('2')).toBeTruthy();
+  });
+});
